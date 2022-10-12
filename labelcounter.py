@@ -1,0 +1,28 @@
+import os
+import sys
+import xmltodict
+
+CLASSES = [
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+]
+
+
+
+# 1. search directories
+# 2. find and read xml files
+# 3. make lists ()
+
+
+def label_counter(xml_dir):
+    for f in os.listdir(xml_dir):
+        if '.xml' in f:
+            in_file_name = '{}/{}'.format(xml_dir, f)
+            out_file_name = '{}/{}'.format(os.getcwd(), f.replace('.xml', '.txt'))
+            out_file = open(out_file_name, 'w')
+            out_file.write()
+
+
+if __name__ == '__main__':
+    # input the top directory (ex. set_k_train)
+
+    label_counter(sys.argv[1])
