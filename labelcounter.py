@@ -6,6 +6,8 @@ CLASSES = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
 ]
 
+# 저는 PJ 입니다.
+
 # 1. search directories
 # 2. find and read xml files
 # 3. make lists ()
