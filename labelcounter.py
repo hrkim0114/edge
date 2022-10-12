@@ -13,6 +13,7 @@ CLASSES = [
 # 3. make lists ()
 # 4. pleasure and joy
 # 5. hello
+# 6. 바보메롱
 
 def make_xmlist(dir):
         xmlist =[]
