@@ -37,7 +37,6 @@ def label_counter(xml_dir):
             out_file = open(out_file_name, 'w')
             out_file.write()
 
-
 if __name__ == '__main__':
     # input the top directory (ex. set_k_train)
 
