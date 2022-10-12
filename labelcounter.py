@@ -12,6 +12,7 @@ CLASSES = [
 # 2. find and read xml files
 # 3. make lists ()
 # 4. pleasure and joy
+# 5. hello
 
 def make_xmlist(dir):
         xmlist =[]
