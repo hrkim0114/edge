@@ -6,15 +6,9 @@ CLASSES = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
 ]
 
-# ddddd
-
 # 1. search directories
 # 2. find and read xml files
 # 3. make lists ()
-# 4. pleasure and joy
-# 5. hello
-# 6. 바보메롱
-# 7. 뭐야뭐야
 
 def make_xmlist(dir):
         xmlist =[]
