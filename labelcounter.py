@@ -37,14 +37,14 @@ def convert_label(in_file_name):
         d['box_w'] = None
         d['box_h'] = None
         d['box_s'] = None
-        df = df.concat([df, d])
+        xml_df = xml_df.concat([df, d])
     elif type(objs) == list:
         for obj in objs:
             d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(obj)
-            df = df.concat([df, d])
+            xml_df = xml_df.concat([df, d])
     else:
         d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(objs)
-        df = df.concat([df, d])
+        xml_df = xml_df.concat([df, d])
 
 def make_xmlist(dir):
     xmlist = []
