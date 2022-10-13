@@ -7,9 +7,9 @@ import numpy as np
 xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
 
 def parse_obj(obj):
-    cl = objs['name']
-    bw = int(objs['bndbox']['xmax']) - int(objs['bndbox']['xmin'])
-    bh = int(objs['bndbox']['ymax']) - int(objs['bndbox']['ymin'])
+    cl = obj['name']
+    bw = int(obj['bndbox']['xmax']) - int(obj['bndbox']['xmin'])
+    bh = int(obj['bndbox']['ymax']) - int(obj['bndbox']['ymin'])
     bs = bw * bh
 
     return cl, bw, bh, bs
@@ -43,7 +43,7 @@ def convert_label(in_file_name):
             d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(obj)
             df = df.concat([df, d])
     else:
-        d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(obj)
+        d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(objs)
         df = df.concat([df, d])
 
 def make_xmlist(dir):
