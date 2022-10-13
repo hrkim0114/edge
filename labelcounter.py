@@ -65,9 +65,11 @@ def label_counter(xml_dir):
 
     for i, f in enumerate(make_xmlist(xml_dir)):
         convert_label(f, xml_df)
-        print("{} ".format(i))
+        print("data file : {} ".format(i))
     # print output !
     # print output !
+    print("Total bndbox : {}".format(xml_df['class'].count()))
+    print("Class count\n", xml.df['class'].value_counts())
     
 
 if __name__ == '__main__':
@@ -76,4 +78,4 @@ if __name__ == '__main__':
 
     label_counter(sys.argv[1])
 
-    print("time : {} s".format(time.time() - start))
+    print("time : {} s".format(round(time.time() - start, 3)))
