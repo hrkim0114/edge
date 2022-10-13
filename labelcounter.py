@@ -60,7 +60,7 @@ def label_counter(xml_dir):
     xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
 
     for i, f in enumerate(make_xmlist(xml_dir)):
-        xml_df = pd.concat(xml_df, convert_label(f))
+        xml_df = pd.concat([xml_df, convert_label(f)])
         print("data file : {} ".format(i))
     
     # print output !
