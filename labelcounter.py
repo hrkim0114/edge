@@ -22,7 +22,7 @@ def make_xmlist(dir):
         for filename in filenames:
             name = os.path.join(dir,filename)
             if os.path.isdir(name):
-                temp =print_file(name)
+                temp =make_xmlist(name)
                 xmlist+=temp
             else:
                 ext = os.path.splitext(name)[-1]
