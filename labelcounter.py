@@ -68,9 +68,11 @@ def label_counter(xml_dir):
         print("data file : {} ".format(i))
     # print output !
     # print output !
-    print("Total bndbox : {}".format(xml_df['class'].count()))
-    print("Class count\n", xml.df['class'].value_counts())
     
+    print("Total bndbox : {}".format(xml_df['class'].count()))
+    print("Class count")
+    for i, val in enumerate(xml_df['class'].value_counts()):
+        print("{} : {}".format(xml_df['class'].value_counts().index[i], val))
 
 if __name__ == '__main__':
     # input the target directory (ex. set_k_train)
