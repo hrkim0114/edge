@@ -62,8 +62,9 @@ def make_xmlist(dir):
 def label_counter(xml_dir):
     xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
 
-    for f in make_xmlist(xml_dir):
+    for i, f in enumerate(make_xmlist(xml_dir)):
         convert_label(f, xml_df)
+        print("{} ".format(i))
     # print output !
     # print output !
     xml_df.head()
