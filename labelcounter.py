@@ -47,20 +47,20 @@ def convert_label(in_file_name):
         df = df.concat([df, d])
 
 def make_xmlist(dir):
-    xmlist =[]
-    filenames = os.listdir(dir)
-    for filename in filenames:
-        name = os.path.join(dir,filename)
-        if os.path.isdir(name):
-            temp =make_xmlist(name)
-            xmlist+=temp
-        else:
-            ext = os.path.splitext(name)[-1]
-            if ext == '.xml':
-                print(name)
-                xmlist.append(name)
-                
-    return xmlist
+        xmlist =[]
+        filenames = os.listdir(dir)
+        for filename in filenames:
+            name = os.path.join(dir,filename)
+            if os.path.isdir(name):
+                temp =make_xmlist(name)
+                xmlist+=temp
+            else:
+                ext = os.path.splitext(name)[-1]
+                if ext == '.xml':
+                    print(name)
+                    xmlist.append(name)
+                    
+        return xmlist
 
 def label_counter(xml_dir):
     for f in make_xmlist(xml_dir):
