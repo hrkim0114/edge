@@ -21,8 +21,8 @@ def convert_label(in_file_name):
     objs = xml_dict['annotation'].get('object', None)
     
     d = pd.DataFrame({
-        'class': [], 'box_w': [], 'box_h': [], 'box_s': [],
-        'img_w': [], 'img_h': [], 'dir': [], 'f_name': []
+        'class': [None], 'box_w': [None], 'box_h': [None], 'box_s': [None],
+        'img_w': [None], 'img_h': [None], 'dir': [None], 'f_name': [None]
         })
     
     d['img_w'] = size['width']
@@ -32,10 +32,6 @@ def convert_label(in_file_name):
     d['f_name'] = path_split[1]
 
     if not objs:
-        d['class'] = None
-        d['box_w'] = None
-        d['box_h'] = None
-        d['box_s'] = None
         return d
     elif type(objs) == list:
         for obj in objs:
@@ -66,13 +62,16 @@ def label_counter(xml_dir):
     for i, f in enumerate(make_xmlist(xml_dir)):
         xml_df = pd.concat(xml_df, convert_label(f))
         print("data file : {} ".format(i))
-    # print output !
-    # print output !
     
+    # print output !
     print("Total bndbox : {}".format(xml_df['class'].count()))
     print("Class count")
     for i, val in enumerate(xml_df['class'].value_counts()):
         print("{} : {}".format(xml_df['class'].value_counts().index[i], val))
+
+    print(xml_df.info())
+    print(xml_df.describe())
+    print(xml_df['class'].value_counts())
 
 if __name__ == '__main__':
     # input the target directory (ex. set_k_train)
