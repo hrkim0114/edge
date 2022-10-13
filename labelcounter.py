@@ -57,6 +57,7 @@ def make_xmlist(dir):
         else:
             ext = os.path.splitext(name)[-1]
             if ext == '.xml':
+                print(name)
                 xmlist.append(name)
                 
     return xmlist
