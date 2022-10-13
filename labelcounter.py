@@ -20,10 +20,10 @@ def convert_label(in_file_name):
     size = xml_dict['annotation'].get('size', None)
     objs = xml_dict['annotation'].get('object', None)
     
-    d = pd.DataFrame({
+    d = {
         'class': [None], 'box_w': [None], 'box_h': [None], 'box_s': [None],
         'img_w': [None], 'img_h': [None], 'dir': [None], 'f_name': [None]
-        })
+        }
     
     d['img_w'] = size['width']
     d['img_h'] = size['height']
@@ -49,8 +49,7 @@ def convert_label(in_file_name):
             d_list['box_w'].append(bw)
             d_list['box_h'].append(bh)
             d_list['box_s'].append(bs)
-        d = pd.concat([d, pd.DataFrame(d_list)])
-        return d
+        return d_list
     
     else:
         d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(objs)
@@ -75,7 +74,7 @@ def label_counter(xml_dir):
     xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
 
     for i, f in enumerate(make_xmlist(xml_dir)):
-        xml_df = pd.concat([xml_df, convert_label(f)])
+        xml_df = pd.concat([xml_df, pd.DataFrame(convert_label(f))])
         print("data file : {} ".format(i))
     
     # print output !
