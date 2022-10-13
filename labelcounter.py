@@ -13,7 +13,7 @@ def parse_obj(obj):
 
     return cl, bw, bh, bs
 
-def convert_label(in_file_name, xml_df):
+def convert_label(in_file_name):
     in_file = open(in_file_name, 'r')
     xml_dict = xmltodict.parse(in_file.read())
     in_file.close()
@@ -36,14 +36,14 @@ def convert_label(in_file_name, xml_df):
         d['box_w'] = None
         d['box_h'] = None
         d['box_s'] = None
-        xml_df = pd.concat([xml_df, d])
+        return d
     elif type(objs) == list:
         for obj in objs:
             d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(obj)
-            xml_df = pd.concat([xml_df, d])
+            return d
     else:
         d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(objs)
-        xml_df = pd.concat([xml_df, d])
+        return d
 
 def make_xmlist(dir):
     xmlist = []
@@ -64,7 +64,7 @@ def label_counter(xml_dir):
     xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
 
     for i, f in enumerate(make_xmlist(xml_dir)):
-        convert_label(f, xml_df)
+        xml_df = pd.concat(xml_df, convert_label(f))
         print("data file : {} ".format(i))
     # print output !
     # print output !
