@@ -11,7 +11,7 @@ def parse_obj(obj):
     bh = int(obj['bndbox']['ymax']) - int(obj['bndbox']['ymin'])
     bs = bw * bh
 
-    return cl, bw, bh, bs
+    return [cl, bw, bh, bs]
 
 def convert_label(in_file_name):
     in_file = open(in_file_name, 'r')
@@ -33,10 +33,25 @@ def convert_label(in_file_name):
 
     if not objs:
         return d
+    
     elif type(objs) == list:
-        for obj in objs:
-            d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(obj)
-            return d
+        d_list = {
+            'class': [], 'box_w': [], 'box_h': [], 'box_s': [],
+            'img_w': [], 'img_h': [], 'dir': [], 'f_name': []
+            }
+        for i, obj in enumerate(objs):
+            d_list['img_w'].append(size['width'])
+            d_list['img_h'].append(size['height'])
+            d_list['dir'].append(path_split[0])
+            d_list['f_name'].append(path_split[1])
+            cl, bw, bh, bs = parse_obj(obj)
+            d_list['class'].append(cl)
+            d_list['box_w'].append(bw)
+            d_list['box_h'].append(bh)
+            d_list['box_s'].append(bs)
+        d = pd.concat([d, pd.DataFrame(d_list)])
+        return d
+    
     else:
         d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(objs)
         return d
@@ -65,9 +80,6 @@ def label_counter(xml_dir):
     
     # print output !
     print("Total bndbox : {}".format(xml_df['class'].count()))
-    print("Class count")
-    for i, val in enumerate(xml_df['class'].value_counts()):
-        print("{} : {}".format(xml_df['class'].value_counts().index[i], val))
 
     print(xml_df.info())
     print(xml_df.describe())
