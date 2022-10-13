@@ -4,6 +4,7 @@ import time
 import xmltodict
 import pandas as pd
 import numpy as np
+from multiprocessing import Process
 
 def parse_obj(obj):
     cl = obj['name']
@@ -11,7 +12,7 @@ def parse_obj(obj):
     bh = int(obj['bndbox']['ymax']) - int(obj['bndbox']['ymin'])
     bs = bw * bh
 
-    return [cl, bw, bh, bs]
+    return cl, bw, bh, bs
 
 def convert_label(in_file_name):
     in_file = open(in_file_name, 'r')
@@ -88,6 +89,9 @@ if __name__ == '__main__':
     # input the target directory (ex. set_k_train)
     start = time.time()
 
-    label_counter(sys.argv[1])
+    t = Process(targetlabel_counter, args=(sys.argv[1],))
+    # label_counter(sys.argv[1])
+    t.start()
+    t.join()
 
     print("time : {} s".format(round(time.time() - start, 3)))
