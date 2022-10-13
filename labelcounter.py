@@ -76,4 +76,4 @@ if __name__ == '__main__':
 
     label_counter(sys.argv[1])
 
-    print("time : {} s".fotmat(time.time() - start))
+    print("time : {} s".format(time.time() - start))
