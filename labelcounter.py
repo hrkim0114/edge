@@ -4,8 +4,6 @@ import xmltodict
 import pandas as pd
 import numpy as np
 
-xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
-
 def parse_obj(obj):
     cl = obj['name']
     bw = int(obj['bndbox']['xmax']) - int(obj['bndbox']['xmin'])
@@ -14,7 +12,7 @@ def parse_obj(obj):
 
     return cl, bw, bh, bs
 
-def convert_label(in_file_name):
+def convert_label(in_file_name, xml_df):
     in_file = open(in_file_name, 'r')
     xml_dict = xmltodict.parse(in_file.read())
     in_file.close()
@@ -62,11 +60,13 @@ def make_xmlist(dir):
     return xmlist
 
 def label_counter(xml_dir):
+    xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
+
     for f in make_xmlist(xml_dir):
-        convert_label(f)
+        convert_label(f, xml_df)
     # print output !
     # print output !
-    df.head()
+    xml_df.head()
 
 if __name__ == '__main__':
     # input the target directory (ex. set_k_train)
