@@ -1,14 +1,50 @@
 import os
 import sys
 import xmltodict
+import pandas as pd
+import numpy as np
 
-CLASSES = [
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
-]
+xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
 
-# 1. search directories
-# 2. find and read xml files
-# 3. make lists ()
+def parse_obj(obj):
+    cl = objs['name']
+    bw = int(objs['bndbox']['xmax']) - int(objs['bndbox']['xmin'])
+    bh = int(objs['bndbox']['ymax']) - int(objs['bndbox']['ymin'])
+    bs = bw * bh
+
+    return cl, bw, bh, bs
+
+def convert_label(in_file_name):
+    in_file = open(in_file_name, 'r')
+    xml_dict = xmltodict.parse(in_file.read())
+    in_file.close()
+    size = xml_dict['annotation'].get('size', None)
+    objs = xml_dict['annotation'].get('object', None)
+    
+    d = pd.DataFrame({
+        'class': [], 'box_w': [], 'box_h': [], 'box_s': [],
+        'img_w': [], 'img_h': [], 'dir': [], 'f_name': []
+        })
+    
+    d['img_w'] = size['width']
+    d['img_h'] = size['height']
+    path_split = os.path.split(in_file_name)
+    d['dir'] = path_split[0]
+    d['f_name'] = path_split[1]
+
+    if not objs:
+        d['class'] = None
+        d['box_w'] = None
+        d['box_h'] = None
+        d['box_s'] = None
+        df = df.concat([df, d])
+    elif type(objs) == list:
+        for obj in objs:
+            d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(obj)
+            df = df.concat([df, d])
+    else:
+        d['class'], d['box_w'], d['box_h'], d['box_s'] = parse_obj(obj)
+        df = df.concat([df, d])
 
 def make_xmlist(dir):
         xmlist =[]
@@ -27,14 +63,13 @@ def make_xmlist(dir):
         return xmlist
 
 def label_counter(xml_dir):
-    for f in os.listdir(xml_dir):
-        if '.xml' in f:
-            in_file_name = '{}/{}'.format(xml_dir, f)
-            out_file_name = '{}/{}'.format(os.getcwd(), f.replace('.xml', '.txt'))
-            out_file = open(out_file_name, 'w')
-            out_file.write()
+    for f in make_xmlist(xml_dir):
+        convert_label(f)
+    # print output !
+    # print output !
+    df.head()
 
 if __name__ == '__main__':
-    # input the top directory (ex. set_k_train)
+    # input the target directory (ex. set_k_train)
 
     label_counter(sys.argv[1])
