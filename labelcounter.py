@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import xmltodict
 import pandas as pd
 import numpy as np
@@ -67,9 +68,12 @@ def label_counter(xml_dir):
         print("{} ".format(i))
     # print output !
     # print output !
-    xml_df.head()
+    
 
 if __name__ == '__main__':
     # input the target directory (ex. set_k_train)
+    start = time.time()
 
     label_counter(sys.argv[1])
+
+    print("time : {} s".fotmat(time.time() - start))
