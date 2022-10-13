@@ -25,11 +25,11 @@ def convert_label(in_file_name):
         'img_w': [None], 'img_h': [None], 'dir': [None], 'f_name': [None]
         }
     
-    d['img_w'] = size['width']
-    d['img_h'] = size['height']
+    d['img_w'] = [size['width']]
+    d['img_h'] = [size['height']]
     path_split = os.path.split(in_file_name)
-    d['dir'] = path_split[0]
-    d['f_name'] = path_split[1]
+    d['dir'] = [path_split[0]]
+    d['f_name'] = [path_split[1]]
 
     if not objs:
         return d
