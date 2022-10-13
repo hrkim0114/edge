@@ -61,10 +61,6 @@ def make_xmlist(dir):
                 
     return xmlist
 
-# 저는 PJ 입니다.
-
-# 저는 YJ 입니다. 
-
 def label_counter(xml_dir):
     for f in make_xmlist(xml_dir):
         convert_label(f)
