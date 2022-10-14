@@ -56,18 +56,23 @@ def convert_label(in_file_name):
         return d
 
 def make_xmlist(dir):
+    print("Gathering xml directories...")
     xmlist = np.array([])
-    filenames = os.listdir(dir)
-    for filename in filenames:
-        name = os.path.join(dir,filename)
-        if os.path.isdir(name):
-            temp = make_xmlist(name)
-            xmlist = np.concatenate((xmlist, temp))
-        else:
-            ext = os.path.splitext(name)[-1]
-            if ext == '.xml':
-                xmlist = np.append(xmlist, name)
-                
+    # filenames = os.listdir(dir)
+    # for filename in filenames:
+    #     name = os.path.join(dir,filename)
+    #     if os.path.isdir(name):
+    #         temp = make_xmlist(name)
+    #         xmlist = np.concatenate((xmlist, temp))
+    #     else:
+    #         if '.xml' in name:
+    #             xmlist = np.append(xmlist, name)
+    
+    for path, dir, files in os.walk(dir):
+        for file in files:
+            if '.xml' in file:
+                xmlist = np.append(xmlist, os.path.join(path, file))
+    
     return xmlist
 
 def label_counter(xmlist):
@@ -84,7 +89,7 @@ if __name__ == '__main__':
     start = time.time()
 
     xmlist = make_xmlist(sys.argv[1])
-
+    xmlist1 = 
     xml_df = label_counter(xmlist)
 
     # save
