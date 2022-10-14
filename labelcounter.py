@@ -5,12 +5,8 @@ import glob
 import xmltodict
 import pandas as pd
 import numpy as np
-import multiprocessing
-from multiprocessing import Process, freeze_support
+from multiprocessing import Process, freeze_support, Manager
 
-manager = multiprocessing.Manager()
-ns = manager.Namespace()
-ns.df = xml_df
 xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
 
 def parse_obj(obj):
@@ -72,32 +68,40 @@ def make_xmlist(dir):
     return xmlist
 
 def label_counter(xmlist):
+    global xml_df
     for i, f in enumerate(xmlist):
         xml_df = pd.concat([xml_df, convert_label(f)])
-        print("data file : {} ".format(i))
+        print("count : {} ".format(i))
     
-    return xml_df
+    # return xml_df
 
 if __name__ == '__main__':
     freeze_support()
     # input the target directory (ex. set_k_train)
     start = time.time()
+    
+    manager = Manager()
+    ns = manager.Namespace()
+    ns.df = xml_df
 
     xmlist = make_xmlist(sys.argv[1])
-    half = len(xmlist)//2
-    xmlist1 = xmlist[:half]
-    xmlist2 = xmlist[half:]
+    n = 4
     
-    p1 = Process(target=label_counter, args=(xmlist1,))
-    p2 = Process(target=label_counter, args=(xmlist2,))
+    sp = len(xmlist)//n
+    xmlists = [xmlist[:sp]]
+    if n > 2:
+        for i in range(n):
+            xmlists.append(xmlist[sp*(n-2):sp*(n-1)])
+    xmlists.append(xmlist[sp*(n-1):])
     
-    p1.start()
-    p2.start()
-    p1.join()
-    p2.join()
-
-    # xml_df = label_counter(xmlist)
-
+    for i, num in enumerate(n):
+        proc = Process(target=label_counter, args=(xmlists[i]))
+        procs.append(proc)
+        proc.start()
+    
+    for proc in procs:
+        proc.join()
+    
     # save
     xml_df.to_csv('test.csv')
 
