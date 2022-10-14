@@ -5,9 +5,10 @@ import glob
 import xmltodict
 import pandas as pd
 import numpy as np
-from multiprocessing import Process
+import multiprocessing
+from multiprocessing import Process, freeze_support
 
-manager = multiprocessing.Maneger()
+manager = multiprocessing.Manager()
 ns = manager.Namespace()
 ns.df = xml_df
 xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
@@ -78,6 +79,7 @@ def label_counter(xmlist):
     return xml_df
 
 if __name__ == '__main__':
+    freeze_support()
     # input the target directory (ex. set_k_train)
     start = time.time()
 
