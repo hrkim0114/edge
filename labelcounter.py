@@ -1,9 +1,11 @@
 import os
 import sys
 import time
+import glob
 import xmltodict
 import pandas as pd
 import numpy as np
+from multiprocessing import Process
 
 def parse_obj(obj):
     cl = obj['name']
@@ -57,21 +59,9 @@ def convert_label(in_file_name):
 
 def make_xmlist(dir):
     print("Gathering xml directories...")
-    xmlist = np.array([])
-    # filenames = os.listdir(dir)
-    # for filename in filenames:
-    #     name = os.path.join(dir,filename)
-    #     if os.path.isdir(name):
-    #         temp = make_xmlist(name)
-    #         xmlist = np.concatenate((xmlist, temp))
-    #     else:
-    #         if '.xml' in name:
-    #             xmlist = np.append(xmlist, name)
-    
+    xmlist = []
     for path, dir, files in os.walk(dir):
-        for file in files:
-            if '.xml' in file:
-                xmlist = np.append(xmlist, os.path.join(path, file))
+        xmlist += glob.glob(os.path.join(path, '*.xml'))
     
     return xmlist
 
@@ -89,8 +79,19 @@ if __name__ == '__main__':
     start = time.time()
 
     xmlist = make_xmlist(sys.argv[1])
-    xmlist1 = 
-    xml_df = label_counter(xmlist)
+    half = len(xmlist)//2
+    xmlist1 = xmlist[:half]
+    xmlist2 = xmlist[half:]
+    
+    p1 = Process(target=label_counter, args=(xmlist1))
+    p2 = Process(target=label_counter, args=(xmlist2))
+    
+    p1.start()
+    p2.start()
+    p1.join()
+    p2.join()
+
+    # xml_df = label_counter(xmlist)
 
     # save
     xml_df.to_csv('test.csv')
