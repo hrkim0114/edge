@@ -7,6 +7,11 @@ import pandas as pd
 import numpy as np
 from multiprocessing import Process
 
+manager = multiprocessing.Maneger()
+ns = manager.Namespace()
+ns.df = xml_df
+xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
+
 def parse_obj(obj):
     cl = obj['name']
     bw = int(obj['bndbox']['xmax']) - int(obj['bndbox']['xmin'])
@@ -66,8 +71,6 @@ def make_xmlist(dir):
     return xmlist
 
 def label_counter(xmlist):
-    xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
-
     for i, f in enumerate(xmlist):
         xml_df = pd.concat([xml_df, convert_label(f)])
         print("data file : {} ".format(i))
@@ -83,8 +86,8 @@ if __name__ == '__main__':
     xmlist1 = xmlist[:half]
     xmlist2 = xmlist[half:]
     
-    p1 = Process(target=label_counter, args=(xmlist1))
-    p2 = Process(target=label_counter, args=(xmlist2))
+    p1 = Process(target=label_counter, args=(xmlist1,))
+    p2 = Process(target=label_counter, args=(xmlist2,))
     
     p1.start()
     p2.start()
