@@ -4,7 +4,6 @@ import time
 import xmltodict
 import pandas as pd
 import numpy as np
-from multiprocessing import Process
 
 def parse_obj(obj):
     cl = obj['name']
@@ -57,41 +56,43 @@ def convert_label(in_file_name):
         return d
 
 def make_xmlist(dir):
-    xmlist = []
+    xmlist = np.array([])
     filenames = os.listdir(dir)
     for filename in filenames:
         name = os.path.join(dir,filename)
         if os.path.isdir(name):
             temp = make_xmlist(name)
-            xmlist += temp
+            xmlist = np.concatenate((xmlist, temp))
         else:
             ext = os.path.splitext(name)[-1]
             if ext == '.xml':
-                xmlist.append(name)
+                xmlist = np.append(xmlist, name)
                 
     return xmlist
 
-def label_counter(xml_dir):
+def label_counter(xmlist):
     xml_df = pd.DataFrame(columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir', 'f_name'])
 
-    for i, f in enumerate(make_xmlist(xml_dir)):
+    for i, f in enumerate(xmlist):
         xml_df = pd.concat([xml_df, convert_label(f)])
         print("data file : {} ".format(i))
     
-    # print output !
-    print("Total bndbox : {}".format(xml_df['class'].count()))
-
-    print(xml_df.info())
-    print(xml_df.describe())
-    print(xml_df['class'].value_counts())
+    return xml_df
 
 if __name__ == '__main__':
     # input the target directory (ex. set_k_train)
     start = time.time()
 
-    t = Process(targetlabel_counter, args=(sys.argv[1],))
-    # label_counter(sys.argv[1])
-    t.start()
-    t.join()
+    xmlist = make_xmlist(sys.argv[1])
 
+    xml_df = label_counter(xmlist)
+
+    # save
+    xml_df.to_csv('test.csv')
+
+    # print output !
+    print("Total bndbox : {}".format(xml_df['class'].count()))
+    print(xml_df.info())
+    print(xml_df.describe())
+    print(xml_df['class'].value_counts())
     print("time : {} s".format(round(time.time() - start, 3)))
