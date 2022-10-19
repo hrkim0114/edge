@@ -41,7 +41,7 @@ def label_counter(dir_name):
     result = parmap.map(convert_label, splited_xmlist, sh, pm_pbar=True, pm_processes=num_cores)
     
     print("[INFO] Converting to DataFrame...\n")
-    xml_df = pd.DataFrame(list(sh), columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir'])
+    xml_df = pd.DataFrame(sh.__deepcopy__({}), columns=['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir'])
     
     xml_df.to_csv('{}.csv'.format(dir_name))
     print("[INFO] Saved file: {}/{}.csv\n".format(os.getcwd(), dir_name))
@@ -61,7 +61,7 @@ def convert_label(xmlist, sh):
         objs = xml_dict['annotation'].get('object', None)
 
         if not objs:
-            sh.append([-1, -1, -1, -1, size['width'], size['height'], in_file_name])
+            sh.append([None, None, None, None, size['width'], size['height'], in_file_name])
         elif type(objs) == list:
             for obj in objs:
                 cl, bw, bh, bs = parse_obj(obj)
@@ -82,27 +82,28 @@ def loader(file_name, option, th, cnt):
 
     xml_df['dir_split'] = xml_df['dir'].str.split('\\').str[-4:-1]
     
-    if option == 0:
-        print("\n<All files>\n")
+    if option == 0: # bounding box count
+        print("\n<All bounding boxes>\n")
         print("**Data : {}\n".format(file_name))
-        print("**Total bndbox : {}\n".format(xml_df['class'].count()))
-        print("**Class count\n", xml_df['class'].value_counts())
+        print("**Total bndbox : {}\n".format(xml_df['dir'].count()))
+        print("**Class count (bndbox)\n", xml_df['class'].value_counts(dropna=False)) # class count
         if cnt:
-            print("\n**Dir count\n", xml_df['dir_split'].value_counts())
-    elif option == 1:
-        xml_list = get_list_large_box(xml_df, th, cnt)
+            print("\n**Dir count (bndbox)\n", xml_df['dir_split'].value_counts(dropna=False)) # dir count (args.count == True)
+    elif option == 1: # image file count
+        xml_list = get_list_large_box_image(xml_df, th, cnt)
         print("\nsave this list? (y/n)")
         ans = input()
         if (ans == 'Y') | (ans == 'y'):
             with open('train.txt', 'w', encoding='UTF-8') as f:
                 for file in xml_list:
                     f.write(file+'\n')
+            print("[INFO] Saved file: {}/train.txt".format(os.getcwd()))
 
-def get_list_large_box(xml_df, th, cnt):
+def get_list_large_box_image(xml_df, th, cnt):
     xml_df.sort_values(by=['box_s'], inplace=True)
     isdupl = xml_df.duplicated(['dir'])
     unique_df = xml_df[~isdupl]
-    filtered_df = unique_df[(unique_df['box_s'] >= th) | (unique_df['box_s'] == -1)]
+    filtered_df = unique_df[(unique_df['box_s'] >= th) | (unique_df['box_s'].isnull())]
 
     large_list = list(set(filtered_df['dir']))
     large_list.sort()
@@ -114,9 +115,9 @@ def get_list_large_box(xml_df, th, cnt):
     print("\n<Get files not including small boxes>\n")
     print("**threshold (area)\t: {}".format(th))
     print("**files\t\t\t: {} / {}\n".format(len(large_list), len(xml_total)))
-    print("**Class count (larger than thres)\n", filtered_df['class'].value_counts()) # class count
+    print("**Class count (files)\n", filtered_df['class'].value_counts(dropna=False)) # class count
     if cnt:
-        print("\n**Dir count (larger than thres)\n", filtered_df['dir_split'].value_counts()) # dir count
+        print("\n**Dir count (files)\n", filtered_df['dir_split'].value_counts(dropna=False)) # dir count (args.count == True)
 
     return large_list
 
