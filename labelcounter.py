@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import glob
+import math
 import xmltodict
 import pandas as pd
 import numpy as np
@@ -83,16 +84,24 @@ def parse_obj(obj):
     cl = obj['name']
     bw = int(obj['bndbox']['xmax']) - int(obj['bndbox']['xmin'])
     bh = int(obj['bndbox']['ymax']) - int(obj['bndbox']['ymin'])
-    bs = bw * bh
+    bs = math.sqrt(bw * bh)
     return cl, bw, bh, bs
 
-def loader(file_name):
+def loader(file_name, option, th):
     xml_df = pd.read_csv(file_name)
     
-    print("**Data : {}\n".format(file_name))
-    print("**Total bndbox : {}\n".format(xml_df['class'].count()))
-    print("**Class count\n", xml_df['class'].value_counts())
-    print("\n", xml_df.describe())
+    if option == 0:
+        print("**Data : {}\n".format(file_name))
+        print("**Total bndbox : {}\n".format(xml_df['class'].count()))
+        print("**Class count\n", xml_df['class'].value_counts())
+    elif option == 1:
+        list = get_list_large_box(xml_df, th)
+        print(list)
+
+def get_list_large_box(xml_df, th):
+    islarge = xml_df['box_s'] >= th
+    large_list = xml_df[islarge]['dir'].replace('.xml','')
+    return large_list
 
 def main():
     print("main")
@@ -103,9 +112,14 @@ if __name__ == '__main__':
     if (sys.argv[1] == 'search') & (len(sys.argv) == 3):
         label_counter(sys.argv[2])
         print("[INFO] Overall time : {} s".format(round(time.time() - start, 3)))
-    elif (sys.argv[1] == 'load') & (len(sys.argv) == 3):
-        loader(sys.argv[2])
+    elif (sys.argv[1] == 'load') & (len(sys.argv) >= 3):
+        if not sys.argv[3]:
+            loader(sys.argv[2], 0, 0)
+        else:
+            loader(sys.argv[2], sys.argv[3], sys.argv[4])
         print("[INFO] Overall time : {} s".format(round(time.time() - start, 3)))
     else:
-        print("Usage: labelcounter.py (search 'directory' / load 'file_name.csv' [option])")
-        print("[option]: ")
+        print("----------Usage----------\n")
+        print("labelcounter.py (search 'directory' / load 'file_name.csv' [option1] [option2])")
+        print("[option1]: 0 -> count class (default) / 1 -> get list of large boxes (area)")
+        print("[option2]: threshold")
