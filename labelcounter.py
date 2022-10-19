@@ -10,11 +10,9 @@ import parmap
 from tqdm import tqdm
 
 def make_xmlist(dir):
-    print("[INFO] Searching xml directories...\n")
     xmlist = []
     for path, dir, files in os.walk(dir):
         xmlist += glob.glob(os.path.join(path, '*.xml'))
-    print("[INFO] Preparing to collect data...\n")
     return xmlist
 
 def label_counter(xmlist, sh0, sh1, sh2, sh3, sh4, sh5, sh6):
@@ -65,14 +63,16 @@ def parse_obj(obj):
     return cl, bw, bh, bs
 
 if __name__ == '__main__':
-    # input the target directory (ex. set_k_train)
+    ## input the target directory (ex. set_k_train)
     start = time.time()
 
+    print("[INFO] Searching xml directories...\n")
     xmlist = np.array(make_xmlist(sys.argv[1]))
     num_cores = mp.cpu_count()
     splited_xmlist = np.array_split(xmlist, num_cores)
     splited_xmlist = [x.tolist() for x in splited_xmlist]
 
+    print("[INFO] Preparing to collect data...\n")
     for i in range(7):
         globals()['sh{}'.format(i)] = mp.Manager().list()
 
@@ -80,17 +80,21 @@ if __name__ == '__main__':
     result = parmap.map(label_counter, splited_xmlist, sh0, sh1, sh2, sh3, sh4, sh5, sh6, pm_pbar=True, pm_processes=num_cores)
 
     print("[INFO] Converting to DataFrame...")
-    d = {'class': list(sh0), 'box_w': list(sh1), 'box_h': list(sh2), 'box_s': list(sh3), 'img_w': list(sh4), 'img_h': list(sh5), 'dir': list(sh6)}
-    xml_df = pd.DataFrame(d)
+    dsh = dict()
+    keys = ['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dor']
+    for i, l in enumerate([sh0, sh1, sh2, sh3, sh4, sh5, sh6]):
+        dsh[keys[i]] = l.__deepcopy__({})
+    
+    xml_df = pd.DataFrame(dsh)
 
-    # save
+    ## save
     xml_df.to_csv('test.csv')
     print("[INFO] Saved csv file\n")
 
-    # print output !
+    ## print output !
     print("\n---------------------------------------\n")
     print("Total bndbox : {}\n".format(xml_df['class'].count()))
-    print("Class count", xml_df['class'].value_counts())
+    print("Class count\n", xml_df['class'].value_counts())
     print("\n", xml_df.head())
     print("\n", xml_df.describe())
     print("Overall time : {} s".format(round(time.time() - start, 3)))
