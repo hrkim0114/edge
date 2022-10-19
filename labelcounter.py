@@ -8,6 +8,20 @@ import pandas as pd
 import numpy as np
 import multiprocessing as mp
 import parmap
+from tqdm import tqdm
+import argparse
+
+parser = argparse.ArgumentParser(
+    description='produce the label list from xml files in the input directory and subfolders,\
+ and select part of them according to the bbox size')
+parser.add_argument('mode', type=str, help='save: search xml files and save .csv file / load: load .csv file')
+parser.add_argument('-d', '--dir', type=str, help='target directory (save) or .csv file (load)')
+parser.add_argument('-o', '--opt', type=int, default=0, help='0: count class / 1: get a list of large area boxes (load)')
+parser.add_argument('-t', '--thres', type=int, default=0, help='threshold (load)')
+parser.add_argument('-c', '--count', type=bool, default=False, help='False: nothing / True: dir count')
+args = parser.parse_args()
+
+pd.set_option('display.max_rows', 100) # display limit
 
 def label_counter(dir_name):
     if not os.path.isdir(dir_name):
@@ -45,7 +59,7 @@ def make_xmlist(dir):
     return xmlist
 
 def convert_label(xmlist, sh0, sh1, sh2, sh3, sh4, sh5, sh6):
-    for in_file_name in xmlist:
+    for in_file_name in tqdm(xmlist):
         in_file = open(in_file_name, 'r')
         xml_dict = xmltodict.parse(in_file.read())
         in_file.close()
@@ -87,39 +101,57 @@ def parse_obj(obj):
     bs = math.sqrt(bw * bh)
     return cl, bw, bh, bs
 
-def loader(file_name, option, th):
+def loader(file_name, option, th, cnt):
     xml_df = pd.read_csv(file_name)
+
+    xml_df['dir_split'] = xml_df['dir'].str.split('\\').str[-4:-1]
     
     if option == 0:
+        print("\n<All files>\n")
         print("**Data : {}\n".format(file_name))
         print("**Total bndbox : {}\n".format(xml_df['class'].count()))
         print("**Class count\n", xml_df['class'].value_counts())
+        if cnt:
+            print("\n**Dir count\n", xml_df['dir_split'].value_counts())
     elif option == 1:
-        list = get_list_large_box(xml_df, th)
-        print(list)
+        xml_list = get_list_large_box(xml_df, th, cnt)
+        print("\nsave this list? (y/n)")
+        ans = input()
+        if (ans == 'Y') | (ans == 'y'):
+            with open('train.txt', 'w', encoding='UTF-8') as f:
+                for file in xml_list:
+                    f.write(file+'\n')
 
-def get_list_large_box(xml_df, th):
-    islarge = xml_df['box_s'] >= th
-    large_list = xml_df[islarge]['dir'].replace('.xml','')
+def get_list_large_box(xml_df, th, cnt):
+    xml_df.sort_values(by=['box_s'], inplace=True)
+    isdupl = xml_df.duplicated(['dir'])
+    unique_df = xml_df[~isdupl]
+    filtered_df = unique_df[(unique_df['box_s'] >= th) | (unique_df['box_s'] == -1)]
+
+    large_list = list(set(filtered_df['dir']))
+    large_list.sort()
+    xml_total = set(xml_df['dir'])
+    
+    for i, s in enumerate(large_list):
+        large_list[i] = os.path.join(os.getcwd(), s.replace('.xml', '.jpg'))
+
+    print("\n<Get files not including small boxes>\n")
+    print("**threshold (area)\t: {}".format(th))
+    print("**files\t\t\t: {} / {}\n".format(len(large_list), len(xml_total)))
+    print("**Class count (larger than thres)\n", filtered_df['class'].value_counts()) # class count
+    if cnt:
+        print("\n**Dir count (larger than thres)\n", filtered_df['dir_split'].value_counts()) # dir count
+
     return large_list
-
-def main():
-    print("main")
 
 if __name__ == '__main__':
     start = time.time()
     
-    if (sys.argv[1] == 'search') & (len(sys.argv) == 3):
-        label_counter(sys.argv[2])
+    if (args.mode == 'save') & bool(args.dir):
+        print(args.dir)
+        label_counter(args.dir)
         print("[INFO] Overall time : {} s".format(round(time.time() - start, 3)))
-    elif (sys.argv[1] == 'load') & (len(sys.argv) >= 3):
-        if not sys.argv[3]:
-            loader(sys.argv[2], 0, 0)
-        else:
-            loader(sys.argv[2], sys.argv[3], sys.argv[4])
-        print("[INFO] Overall time : {} s".format(round(time.time() - start, 3)))
+    elif (args.mode == 'load') & bool(args.dir):
+        loader(args.dir, args.opt, args.thres, args.count)
     else:
-        print("----------Usage----------\n")
-        print("labelcounter.py (search 'directory' / load 'file_name.csv' [option1] [option2])")
-        print("[option1]: 0 -> count class (default) / 1 -> get list of large boxes (area)")
-        print("[option2]: threshold")
+        print("usage: labelcounter.py [-h] [-d DIR] [-o OPT] [-t THRES] [-c COUNT] mode")
