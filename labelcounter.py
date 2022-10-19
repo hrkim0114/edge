@@ -7,16 +7,10 @@ import pandas as pd
 import numpy as np
 import multiprocessing as mp
 import parmap
-from tqdm import tqdm
 
-def make_xmlist(dir):
-    xmlist = []
-    for path, dir, files in os.walk(dir):
-        xmlist += glob.glob(os.path.join(path, '*.xml'))
-    return xmlist
 
 def label_counter(xmlist, sh0, sh1, sh2, sh3, sh4, sh5, sh6):
-    for i, f in enumerate(tqdm(xmlist)):
+    for f in xmlist:
         convert_label(f, sh0, sh1, sh2, sh3, sh4, sh5, sh6)
 
 def convert_label(in_file_name, sh0, sh1, sh2, sh3, sh4, sh5, sh6):
@@ -54,12 +48,17 @@ def convert_label(in_file_name, sh0, sh1, sh2, sh3, sh4, sh5, sh6):
         sh5.append(size['height'])
         sh6.append(in_file_name)
 
+def make_xmlist(dir):
+    xmlist = []
+    for path, dir, files in os.walk(dir):
+        xmlist += glob.glob(os.path.join(path, '*.xml'))
+    return xmlist
+
 def parse_obj(obj):
     cl = obj['name']
     bw = int(obj['bndbox']['xmax']) - int(obj['bndbox']['xmin'])
     bh = int(obj['bndbox']['ymax']) - int(obj['bndbox']['ymin'])
     bs = bw * bh
-
     return cl, bw, bh, bs
 
 if __name__ == '__main__':
@@ -79,17 +78,18 @@ if __name__ == '__main__':
     print("[INFO] Use {} cores of CPU".format(num_cores))
     result = parmap.map(label_counter, splited_xmlist, sh0, sh1, sh2, sh3, sh4, sh5, sh6, pm_pbar=True, pm_processes=num_cores)
 
-    print("[INFO] Converting to DataFrame...")
+    print("[INFO] Converting to DataFrame...\n")
     dsh = dict()
-    keys = ['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dor']
+    keys = ['class', 'box_w', 'box_h', 'box_s', 'img_w', 'img_h', 'dir']
     for i, l in enumerate([sh0, sh1, sh2, sh3, sh4, sh5, sh6]):
         dsh[keys[i]] = l.__deepcopy__({})
     
     xml_df = pd.DataFrame(dsh)
 
     ## save
-    xml_df.to_csv('test.csv')
-    print("[INFO] Saved csv file\n")
+    file_name = sys.argv[1]
+    xml_df.to_csv('{}.csv'.format(file_name))
+    print("[INFO] Saved file: {}/{}.csv\n".format(os.getcwd(), file_name))
 
     ## print output !
     print("\n---------------------------------------\n")
