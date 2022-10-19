@@ -9,6 +9,10 @@ import multiprocessing as mp
 import parmap
 
 def label_counter(dir_name):
+    if not os.path.isdir(dir_name):
+        print("Input directory does not exist!")
+        return
+    
     print("[INFO] Searching xml directories...\n")
     xmlist = np.array(make_xmlist(dir_name))
     num_cores = mp.cpu_count()
@@ -30,7 +34,6 @@ def label_counter(dir_name):
     
     xml_df = pd.DataFrame(dsh)
 
-    ## save
     xml_df.to_csv('{}.csv'.format(dir_name))
     print("[INFO] Saved file: {}/{}.csv\n".format(os.getcwd(), dir_name))
 
@@ -91,9 +94,12 @@ def loader(file_name):
     print("**Class count\n", xml_df['class'].value_counts())
     print("\n", xml_df.describe())
 
+def main():
+    print("main")
+
 if __name__ == '__main__':
-    ## input the target directory (ex. set_k_train)
     start = time.time()
+    
     if (sys.argv[1] == 'search') & (len(sys.argv) == 3):
         label_counter(sys.argv[2])
         print("[INFO] Overall time : {} s".format(round(time.time() - start, 3)))
@@ -101,4 +107,5 @@ if __name__ == '__main__':
         loader(sys.argv[2])
         print("[INFO] Overall time : {} s".format(round(time.time() - start, 3)))
     else:
-        print("Usage: labelcounter.py (search 'directory' / load 'file_name.csv')")
+        print("Usage: labelcounter.py (search 'directory' / load 'file_name.csv' [option])")
+        print("[option]: ")
