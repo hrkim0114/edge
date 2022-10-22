@@ -1,4 +1,6 @@
-# edge statistic tool
+# Label Data Statistic Tool
+
+### Data
 Darknet label file (.xml)
 
 usage: labelcounter2.py [-h] [-d DIR] [-o OPT] [-t THRES] [-c COUNT] mode
