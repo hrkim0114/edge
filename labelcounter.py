@@ -74,7 +74,7 @@ def parse_obj(obj):
     cl = obj['name']
     bw = int(obj['bndbox']['xmax']) - int(obj['bndbox']['xmin'])
     bh = int(obj['bndbox']['ymax']) - int(obj['bndbox']['ymin'])
-    bs = math.sqrt(bw * bh)
+    bs = math.sqrt(abs(bw * bh))
     return cl, bw, bh, bs
 
 def loader(file_name, option, th, cnt):
