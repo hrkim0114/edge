@@ -74,7 +74,7 @@ def parse_obj(obj):
     cl = obj['name']
     bw = int(obj['bndbox']['xmax']) - int(obj['bndbox']['xmin'])
     bh = int(obj['bndbox']['ymax']) - int(obj['bndbox']['ymin'])
-    bs = math.sqrt(abs(bw * bh))
+    bs = math.sqrt(bw * bh)
     return cl, bw, bh, bs
 
 def loader(file_name, option, th, cnt):
@@ -94,10 +94,11 @@ def loader(file_name, option, th, cnt):
         print("\nsave this list? (y/n)")
         ans = input()
         if (ans == 'Y') | (ans == 'y'):
-            with open('train.txt', 'w', encoding='UTF-8') as f:
+            openfile = args.dir.replace('.csv', '')
+            with open(openfile + '.txt', 'w', encoding='UTF-8') as f:
                 for file in xml_list:
                     f.write(file+'\n')
-            print("[INFO] Saved file: {}/train.txt".format(os.getcwd()))
+            print("[INFO] Saved file: {}/{}.txt".format(os.getcwd(), openfile))
 
 def get_list_large_box_image(xml_df, th, cnt):
     xml_df.sort_values(by=['box_s'], inplace=True)
